@@ -13,6 +13,7 @@ import {
   ScrollView,
 } from "react-native";
 import { router } from "expo-router";
+import Checkbox from 'expo-checkbox';
 
 import Navbar from "./components/navbar";
 import Screen from "./components/Screen";
@@ -25,15 +26,24 @@ const LoginUp = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [user, setUser] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isChecked, setChecked] = useState(false)
+  const [view, setView] = useState(true)
+  const [passwordview, setPasswordView] = useState(true)
   // Placeholder for future signup logic
   const handleSignUp = () => {
     // Add validation logic here
+    if(!password || !fullName || !email ||!confirmPassword){
+      Alert.alert("name, email and password required")
+    }
+    
     if (password !== confirmPassword) {
       // Use a custom modal or inline error message instead of Alert for better UX in RN
       console.log("Passwords do not match!");
       // Example: Set an error state to display a message on screen
       return;
     }
+    
+
     setLoading(true);
     // Simulate API call
     setTimeout(() => {
@@ -43,6 +53,20 @@ const LoginUp = () => {
       // Navigate to next screen or show success message
     }, 2000);
   };
+  // console.log(isChecked)
+  let imageSource;
+  let imageSource1;
+    if (passwordview) {
+    imageSource1 = require('../assets/eye-icon.png');
+  } else {
+    imageSource1 = require('../assets/closeEye.png');
+  }
+  if (view) {
+    imageSource = require('../assets/eye-icon.png');
+  } else {
+    imageSource = require('../assets/closeEye.png');
+  }
+  
   return (
     <Screen>
       <KeyboardAvoidingView
@@ -62,12 +86,10 @@ const LoginUp = () => {
             >
               Create Account
             </Text>
-            <Text>
-              Join us to start your <Text>SWYFT</Text>journey
-            </Text>
+            
             <Text style={styles.subText}>
               Join us to start your{" "}
-              <Text style={{ color: "#4ADE80" }}>SWYFT</Text> journey
+              <Text style={{ color: "#4A6DDE" }}>SWYFT</Text> journey
             </Text>
             <View style={styles.subContainer}>
               <Text style={{ marginBottom: 8, color: "white" }}>Full Name</Text>
@@ -107,11 +129,11 @@ const LoginUp = () => {
                   placeholder="Create a password"
                   style={styles.forPassword}
                   placeholderTextColor={"#6B6B6B"}
-                  secureTextEntry={true}
+                  secureTextEntry={passwordview}
                   value={password}
                   onChangeText={setPassword}
                 />
-                <Image source={require("../assets/eye-icon.png")} />
+                <Image source={imageSource1} />
               </View>
               <Text
                 style={[{ marginBottom: 8, marginTop: 16, color: "white" }]}
@@ -129,22 +151,44 @@ const LoginUp = () => {
                 ]}
               >
                 <TextInput
-                  placeholder="Confirm your password"
+                  placeholder="Confirm your passwords"
                   style={styles.forPassword}
                   placeholderTextColor={"#6B6B6B"}
-                  secureTextEntry={true}
+                  secureTextEntry={view}
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
+                  
                 />
-                <Image source={require("../assets/eye-icon.png")} />
+                <TouchableOpacity onPress={() => setView(!view)}>
+                  <Image source={imageSource} onPress={() => console.log("here")}/>
+                </TouchableOpacity>
               </View>
             </View>
-            <View style={{flexDirection:"row"}}>
-              <View style={{width:16, height:16, backgroundColor:"white"}}></View>
-              <Text style={styles.agree}>I agree to the <Text style={styles.green}>Terms of Service</Text> and <Text style={styles.green}>Privacy Policy</Text></Text>
+            <View style={{ flexDirection: "row" }}>
+              {/* <View
+                style={{ width: 16, height: 16, backgroundColor: "white" }}
+              ></View> */}
+              <Checkbox style={{backgroundColor:"white", marginRight:5}} value={isChecked} onValueChange={setChecked} />
+              <Text style={styles.agree}>
+                I agree to the 
+                <Text style={styles.green}> Terms of Service</Text> and{" "}
+                <Text style={styles.green}>Privacy Policy</Text>
+              </Text>
             </View>
-            <Btn name={'Create Account'} route={'./Db'}/>
-             <Text style={{color:"#999999"}}>Don't have an account? <TouchableOpacity onPress={()=> router.navigate("./auth/login")}><Text style={{color:"#4A6DDE"}}>Sign up</Text></TouchableOpacity></Text>
+            <Btn name={"Create Account"} route={"./Db"} />
+            <View
+              style={{
+                marginTop:10,
+                justifyContent: "center",
+                alignItems: "center",
+                flexDirection:"row"
+              }}
+            >
+              <Text style={{color:"#999999"}}>Already have an account? </Text>
+              <TouchableOpacity onPress={() => router.navigate("./auth/login")}>
+                <Text style={{ color: "#4A6DDE" }}>Sign up</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -158,14 +202,13 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
   },
-  green:{
-    color:"green"
+  green: {
+    color: "#4A6DDE",
   },
   inputdesign: {
     color: "white",
     width: "100%",
     height: 50,
-    color: "blue",
     backgroundColor: "#222222",
     borderRadius: 5,
     padding: 16,
@@ -181,6 +224,7 @@ const styles = StyleSheet.create({
     height: 50,
     width: "90%",
     paddingLeft: 16,
+    color:"white"
   },
   subText: {
     fontSize: 16,
@@ -197,10 +241,10 @@ const styles = StyleSheet.create({
     flexGrow: 1, // Allows content to grow within ScrollView
     backgroundColor: "#111111", // Background should apply to the Screen or here
   },
-  agree:{
-    color:"#999999",
-    fontSize:14
-  }
+  agree: {
+    color: "#999999",
+    fontSize: 12,
+  },
 });
 
 export default LoginUp;

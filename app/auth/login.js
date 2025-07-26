@@ -15,20 +15,25 @@ import {
 import Navbar from "../components/navbar";
 import Screen from "../components/Screen";
 import Btn from "../components/button";
+import Checkbox from "expo-checkbox";
+import { router } from "expo-router";
+// import LoginUp from "..";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [view, setView] = useState(true)
 
   const [loading, setLoading] = useState(false);
-  // Placeholder for future signup logic
+  if (view) {
+    imageSource = require('../../assets/eye-icon.png');
+  } else {
+    imageSource = require('../../assets/closeEye.png');
+  }
   const handleLogin = () => {
-    // Add validation logic here
-    if (password !== confirmPassword) {
-      // Use a custom modal or inline error message instead of Alert for better UX in RN
-      console.log("Passwords do not match!");
-      // Example: Set an error state to display a message on screen
-      return;
+    
+  if(!password || !email){
+      Alert.alert("password and email required")
     }
     setLoading(true);
     // Simulate API call
@@ -58,7 +63,7 @@ const Login = () => {
             >
               Welcome Back
             </Text>
-            
+
             <Text style={styles.subText}>
               Sign in to your account to continue
             </Text>
@@ -92,21 +97,47 @@ const Login = () => {
                   placeholder="Create a password"
                   style={styles.forPassword}
                   placeholderTextColor={"#6B6B6B"}
-                  secureTextEntry={true}
+                  secureTextEntry={view}
                   value={password}
                   onChangeText={setPassword}
                 />
-                <Image source={require("../../assets/eye-icon.png")} />
+                <TouchableOpacity onPress={() => setView(!view)}>
+
+                <Image source={imageSource} />
+                </TouchableOpacity>
               </View>
+            </View>
+
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                width: "100%",
+                paddingHorizontal: 20,
+              }}
+            >
+              <View style={{ flexDirection: "row", gap:5 }}>
+                <Checkbox style={{backgroundColor:"white"}}/>
+                <Text style={{color:"#999999"}}>Remember me</Text>
+              </View>
+              <TouchableOpacity>
+                <Text style={{color:"#4A6DDE"}}>Forgot Password?</Text>
+              </TouchableOpacity>
+            </View>
+            <Btn name={"Sign Up"} route="./auth/signup" />
+            <View style={{
+                marginTop:10,
+                justifyContent: "center",
+                alignItems: "center",
+                flexDirection:"row",
+                gap:5
+              }}>
+              <Text style={{color:"#999999"}}>Don't have an account?</Text>
               
+              <TouchableOpacity onPress={ () => router.navigate("..")}>
+                <Text style={{ color: "#4A6DDE" }}>Sign up</Text>
+              </TouchableOpacity>
             </View>
-            
-            <View style={{flexDirection:"row", justifyContent:"space-between", width:"100%", paddingHorizontal:20}}>
-              <View style={{flexDirection:"row"}} ><View style={{width:16, height:16, backgroundColor:"white"}} /><Text>Remember me</Text></View>
-              <TouchableOpacity><Text>Forgot Password?</Text></TouchableOpacity>
-            </View>
-            <Btn name={'Sign Up'} route='./auth/signup'/>
-            <Text>Don't have an account? <TouchableOpacity><Text style={{color:"#4A6DDE"}}>Sign up</Text></TouchableOpacity></Text>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -120,14 +151,13 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
   },
-  green:{
-    color:"green"
+  green: {
+    color: "green",
   },
   inputdesign: {
     color: "white",
     width: "100%",
     height: 50,
-    color: "blue",
     backgroundColor: "#222222",
     borderRadius: 5,
     padding: 16,
@@ -143,6 +173,7 @@ const styles = StyleSheet.create({
     height: 50,
     width: "90%",
     paddingLeft: 16,
+    color:"white"
   },
   subText: {
     fontSize: 16,
@@ -159,10 +190,10 @@ const styles = StyleSheet.create({
     flexGrow: 1, // Allows content to grow within ScrollView
     backgroundColor: "#111111", // Background should apply to the Screen or here
   },
-  agree:{
-    color:"#999999",
-    fontSize:14
-  }
+  agree: {
+    color: "#999999",
+    fontSize: 14,
+  },
 });
 
 export default Login;

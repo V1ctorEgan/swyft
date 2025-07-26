@@ -1,9 +1,10 @@
-import { View, StyleSheet, SafeAreaView, Text } from "react-native"
+import { View, StyleSheet, SafeAreaView, Text, Image } from "react-native"
 const Navbar = () =>{
     return(
 
         <SafeAreaView style={styles.container}>
-            <View style={{width:"100%", height:"100%", justifyContent:"center", alignItems:"center"}}>
+            <View style={{width:"100%", height:"100%", justifyContent:"center", alignItems:"center", flexDirection:"row", gap:2}}>
+            <Image source={require("../../assets/swyft.png")} />
             <Text style={styles.title}>
                 SWYFT
             </Text>

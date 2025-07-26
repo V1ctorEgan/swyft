@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, Image } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from "react-native";
 import Screen from "./components/Screen";
 import { useState } from "react";
 import ChargeLevel from "./components/chargeLevel";
@@ -30,8 +30,11 @@ const Db = () => {
                   <Text style={{fontSize:45, fontWeight:"bold", color:"white"}}>
                     John Doe
                   </Text>
-                  <View style={{backgroundColor:"#4A6DDE", width:57, height:57, borderRadius:57}}>
+                  <View style={{backgroundColor:"#4A6DDE", width:57, height:57, borderRadius:57, justifyContent:"center", alignItems:"center"}}>
+                    <TouchableOpacity>
 
+                    <Image source={require("../assets/bell.png")} />
+                    </TouchableOpacity>
                   </View>
                 </View>
 
