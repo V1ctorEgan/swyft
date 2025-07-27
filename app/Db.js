@@ -1,13 +1,77 @@
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, ActivityIndicator } from "react-native";
 import Screen from "./components/Screen";
-import { useState } from "react";
+import { useState, useEffect, useContext } from "react";
 import ChargeLevel from "./components/chargeLevel";
 import Monitor from "./components/monitor";
 import Btn2 from "./components/btn2";
+import { router } from "expo-router";
 
+import { doc, getDoc } from 'firebase/firestore';
+import { AuthContext } from "./AuthContext";
 const Db = () => {
+  const { auth, db, user: currentFirebaseUser, appId } = useContext(AuthContext);
   const [voltage, setVoltage] = useState("48.5");
   const [distance, setDistance] = useState("0.0 ");
+  const [displayName, setDisplayName] = useState(null); // Highlight: State for user's full name
+  const [loadingName, setLoadingName] = useState(true);
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      if (currentFirebaseUser && db && appId) {
+        // First, try to get from Firebase Auth displayName (set during signup updateProfile)
+        if (currentFirebaseUser.displayName) {
+          setDisplayName(currentFirebaseUser.displayName);
+          setLoadingName(false);
+          return;
+        }
+
+        // If displayName is not set or not immediately available, fetch from Firestore
+        try {
+          // Adjust path if your profile document has a different ID than user.uid
+          const userDocRef = doc(db, `artifacts/${appId}/users/${currentFirebaseUser.uid}/profiles`, currentFirebaseUser.uid);
+          const docSnap = await getDoc(userDocRef);
+
+          if (docSnap.exists()) {
+            const userData = docSnap.data();
+            setDisplayName(userData.fullName || "User"); // Use fullName from Firestore
+            console.log("Fetched user data from Firestore:", userData);
+          } else {
+            console.log("No user profile found in Firestore for UID:", currentFirebaseUser.uid);
+            setDisplayName("User"); // Default if no profile found
+          }
+        } catch (error) {
+          console.error("Error fetching user profile from Firestore:", error);
+          setDisplayName("User"); // Default on error
+        } finally {
+          setLoadingName(false);
+        }
+      } else if (!currentFirebaseUser) {
+        // If no user is logged in, navigate to login. This handles cases where AuthContext isn't ready
+        // or user somehow navigated to Db without being logged in.
+        router.replace('/auth/login');
+      }
+    };
+
+    fetchUserName();
+  }, [currentFirebaseUser, db, appId]); // Dependencies: re-run if user, db, or appId changes
+
+   const handleLogout = async () => {
+    try {
+      await auth.signOut();
+      console.log("User signed out.");
+      router.replace('/auth/login'); // Navigate back to login page
+    } catch (error) {
+      console.error("Error signing out:", error);
+      // You might want to display an error message to the user here
+    }
+  };
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good Morning';
+    if (hour < 18) return 'Good Afternoon';
+    return 'Good Evening';
+  };
   
   return (
     <Screen>
@@ -22,11 +86,15 @@ const Db = () => {
 
             </View>
               <View style={{padding:16}}>
-                <Text style={styles.live}>Good Morning,</Text>
+                <Text style={styles.live}>{getGreeting()},</Text>
                 <View style={{flexDirection:"row", justifyContent:"space-between", alignItems:"center"}}>
-                  <Text style={{fontSize:45, fontWeight:"bold", color:"white"}}>
-                    John Doe
-                  </Text>
+                  {loadingName ? ( // Highlight: Conditional rendering for name
+                    <ActivityIndicator size="large" color="#fff" />
+                  ) : (
+                    <Text style={{fontSize:45, fontWeight:"bold", color:"white"}}>
+                      {displayName || "John Doe"} {/* Highlight: Display fetched name */}
+                    </Text>
+                  )}
                   <View style={{backgroundColor:"#4A6DDE", width:57, height:57, borderRadius:57, justifyContent:"center", alignItems:"center"}}>
                     <TouchableOpacity>
 
@@ -37,7 +105,10 @@ const Db = () => {
 
               </View>
           <View style={styles.container}>
-            <View style={styles.firstbox}>
+            {/* <View style={styles.firstbox}>
+
+
+
               <View
                 style={{
                   flexDirection: "row",
@@ -77,7 +148,7 @@ const Db = () => {
                 </Text>
               </View>
               <ChargeLevel />
-            </View>
+            </View> */}
             <Monitor />
             <View style={[styles.lastbox, { marginTop: 16 }]}>
               <View
