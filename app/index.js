@@ -315,7 +315,7 @@ const SignUp = () => {
             >
               <Text style={{color:"#999999"}}>Already have an account? </Text>
               <TouchableOpacity onPress={() => router.navigate("./auth/login")}>
-                <Text style={{ color: "#4A6DDE" }}>Sign up</Text>
+                <Text style={{ color: "#4A6DDE" }}>Sign In</Text>
               </TouchableOpacity>
             </View>
           </View>

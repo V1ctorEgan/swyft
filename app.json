@@ -2,7 +2,7 @@
   "expo": {
     "name": "swyftbike",
     "slug": "swyftbike",
-    "scheme": "swyftbike", 
+    "scheme": "swyftbike",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/swyft.png",
@@ -28,6 +28,12 @@
     },
     "plugins": [
       "expo-router"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "fdb45d9e-ad57-4b36-89a3-348e4771efeb"
+      }
+    }
   }
 }

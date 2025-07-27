@@ -1,8 +1,8 @@
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, ActivityIndicator } from "react-native";
 import Screen from "./components/Screen";
 import { useState, useEffect, useContext } from "react";
-import ChargeLevel from "./components/chargeLevel";
 import Monitor from "./components/monitor";
+import Monitors from "./components/test";
 import Btn2 from "./components/btn2";
 import { router } from "expo-router";
 
@@ -149,12 +149,18 @@ const Db = () => {
               </View>
               <ChargeLevel />
             </View> */}
-            <Monitor />
+            {/* <Monitor /> */}
+            <Monitors />
             <View style={[styles.lastbox, { marginTop: 16 }]}>
               <View
                 style={{
                   flexDirection: "row",
                   justifyContent: "space-between",
+                  position:"absolute",
+                  top:0,
+                  left:0,
+                  right:0,
+                  zIndex:10
                 }}
               >
                 <Text style={styles.battery}>Ride Statistics</Text>
