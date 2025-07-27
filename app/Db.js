@@ -2,16 +2,13 @@ import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from "rea
 import Screen from "./components/Screen";
 import { useState } from "react";
 import ChargeLevel from "./components/chargeLevel";
-import SpeedMonitor from "../speedm";
-import { AnimatedCircularProgress } from "react-native-circular-progress";
 import Monitor from "./components/monitor";
 import Btn2 from "./components/btn2";
 
 const Db = () => {
   const [voltage, setVoltage] = useState("48.5");
   const [distance, setDistance] = useState("0.0 ");
-  const currentSpeed = 41.6;
-  const maxSpeed = 45;
+  
   return (
     <Screen>
       <ScrollView>
@@ -172,8 +169,8 @@ const styles = StyleSheet.create({
     padding: 25,
   },
   scrollContent: {
-    flexGrow: 1, // Allows content to grow within ScrollView
-    backgroundColor: "#111111", // Background should apply to the Screen or here
+    flexGrow: 1, 
+    backgroundColor: "#111111", 
   },
   container: {
     padding: 16,

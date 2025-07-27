@@ -2,10 +2,13 @@ import { router } from "expo-router";
 import React from "react";
 import { TouchableOpacity, StyleSheet, Text } from "react-native";
 
-const Btn = ({name, route}) =>{
+const Btn = ({name, route, action}) =>{
     return(
         <TouchableOpacity style={styles.container} onPress={()=>router.navigate(`${route}`)}>
+            <TouchableOpacity onPress={()=> action && action}>
+
             <Text style={{ color:"white"}}>{name}</Text>
+            </TouchableOpacity>
         </TouchableOpacity>
     )
 }

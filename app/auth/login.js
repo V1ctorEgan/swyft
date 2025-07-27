@@ -17,7 +17,6 @@ import Screen from "../components/Screen";
 import Btn from "../components/button";
 import Checkbox from "expo-checkbox";
 import { router } from "expo-router";
-// import LoginUp from "..";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -47,7 +46,7 @@ const Login = () => {
   return (
     <Screen>
       <KeyboardAvoidingView
-        style={{ flex: 1, width: "100%" }} // Ensure it takes full width
+        style={{ flex: 1, width: "100%" }} 
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView style={styles.scrollContent}>

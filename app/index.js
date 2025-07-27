@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   View,
   Text,
@@ -14,12 +14,24 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import Checkbox from 'expo-checkbox';
+// Import Firebase modules
+import {
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from 'firebase/auth';
+import {
+  doc,
+  setDoc,
+} from 'firebase/firestore';
+import AuthProvider, { AuthContext } from './AuthContext';
 
 import Navbar from "./components/navbar";
 import Screen from "./components/Screen";
 import Btn from "./components/button";
 
-const LoginUp = () => {
+const SignUp = () => {
+  const { auth, db, appId } = useContext(AuthContext);
+
   const [fullName, setFullname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,30 +41,93 @@ const LoginUp = () => {
   const [isChecked, setChecked] = useState(false)
   const [view, setView] = useState(true)
   const [passwordview, setPasswordView] = useState(true)
+  const [errorMessage, setErrorMessage] = useState('');
+
   // Placeholder for future signup logic
-  const handleSignUp = () => {
-    // Add validation logic here
-    if(!password || !fullName || !email ||!confirmPassword){
-      Alert.alert("name, email and password required")
-    }
-    
-    if (password !== confirmPassword) {
-      // Use a custom modal or inline error message instead of Alert for better UX in RN
-      console.log("Passwords do not match!");
-      // Example: Set an error state to display a message on screen
+  const handleSignUp = async () => {
+    setLoading(true);
+    setErrorMessage('');
+     console.log("i am here")
+    if (!fullName || !email || !password || !confirmPassword) {
+      setErrorMessage("Full Name, Email, and Password are required.");
+      setLoading(false);
       return;
     }
-    
 
-    setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+    if (password !== confirmPassword) {
+      setErrorMessage("Passwords do not match!");
       setLoading(false);
-      console.log("Sign Up Attempt:", { user, email, password });
+      return;
+    }
 
-      // Navigate to next screen or show success message
-    }, 2000);
+    if (!isChecked) {
+      setErrorMessage("You must agree to the Terms of Service and Privacy Policy.");
+      setLoading(false);
+      return;
+    }
+
+    // Check if Firebase instances are available from context
+    if (!auth || !db) {
+        setErrorMessage('Firebase services not initialized. Please ensure AuthContext is properly set up.');
+        setLoading(false);
+        return;
+    }
+      try {
+      // 1. Create user with Email and Password in Firebase Authentication
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // 2. Update user's display name in Firebase Auth profile
+      await updateProfile(user, { displayName: fullName });
+
+      // 3. Store full name and email in Firestore
+      // Collection path: /artifacts/{appId}/users/{userId}/profiles
+      // Document path: /artifacts/{appId}/users/{userId}/profiles/{user.uid}
+      const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/profiles`, user.uid);
+      await setDoc(userDocRef, {
+        fullName: fullName,
+        email: email,
+        createdAt: new Date()
+      }, { merge: true });
+
+      console.log("Sign Up successful for:", user.email, "UID:", user.uid);
+      router.navigate("./Db"); // Navigate to the dashboard or a success screen
+
+      // Reset form fields after successful signup
+      setFullName('');
+      setEmail('');
+      setPassword('');
+      setConfirmPassword('');
+      setChecked(false);
+      setErrorMessage('');
+
+    } catch (error) {
+      console.error("Firebase Sign Up Error:", error);
+      let friendlyMessage = 'An unexpected error occurred during signup.';
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          friendlyMessage = 'This email address is already in use.';
+          break;
+        case 'auth/weak-password':
+          friendlyMessage = 'Password is too weak (minimum 6 characters).';
+          break;
+        case 'auth/invalid-email':
+          friendlyMessage = 'The email address is not valid.';
+          break;
+        case 'auth/operation-not-allowed':
+          friendlyMessage = 'Email/Password sign-in is not enabled in Firebase. Please check your Firebase project settings.';
+          break;
+        default:
+          friendlyMessage = `Error: ${error.message}`;
+      }
+      setErrorMessage(friendlyMessage);
+    } finally {
+      setLoading(false);
+    }
   };
+
+
+    
   // console.log(isChecked)
   let imageSource;
   let imageSource1;
@@ -70,7 +145,7 @@ const LoginUp = () => {
   return (
     <Screen>
       <KeyboardAvoidingView
-        style={{ flex: 1, width: "100%" }} // Ensure it takes full width
+        style={{ flex: 1, width: "100%" }} 
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView style={styles.scrollContent}>
@@ -99,6 +174,7 @@ const LoginUp = () => {
                 placeholderTextColor={"#6B6B6B"}
                 value={user}
                 onChangeText={setUser}
+                autoCapitalize="words"
               />
               <Text style={{ marginBottom: 8, color: "white", marginTop: 16 }}>
                 Email Address
@@ -109,6 +185,7 @@ const LoginUp = () => {
                 placeholderTextColor={"#6B6B6B"}
                 value={email}
                 onChangeText={setEmail}
+                autoCapitalize="none"
               />
               <Text
                 style={[{ marginBottom: 8, marginTop: 16, color: "white" }]}
@@ -164,10 +241,10 @@ const LoginUp = () => {
                 </TouchableOpacity>
               </View>
             </View>
+            {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+
             <View style={{ flexDirection: "row" }}>
-              {/* <View
-                style={{ width: 16, height: 16, backgroundColor: "white" }}
-              ></View> */}
+             
               <Checkbox style={{backgroundColor:"white", marginRight:5}} value={isChecked} onValueChange={setChecked} />
               <Text style={styles.agree}>
                 I agree to the 
@@ -175,7 +252,14 @@ const LoginUp = () => {
                 <Text style={styles.green}>Privacy Policy</Text>
               </Text>
             </View>
-            <Btn name={"Create Account"} route={"./Db"} />
+            
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Btn name={"Create Account"} route={"./Db"} action={handleSignUp}/>
+              )}
+            
+            {/* <Btn name={"Create Account"} route={"./Db"} /> */}
             <View
               style={{
                 marginTop:10,
@@ -192,6 +276,7 @@ const LoginUp = () => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+        
     </Screen>
   );
 };
@@ -201,6 +286,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#111111",
     flex: 1,
     alignItems: "center",
+  },
+  errorText: {
+    color: '#ff6b6b',
+    marginTop: 10,
+    textAlign: 'center',
+    fontSize: 14,
+    width: '90%',
   },
   green: {
     color: "#4A6DDE",
@@ -247,4 +339,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginUp;
+export default SignUp;
